@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 def fetch_flights_data(api_url):
     """Fetch airport flight data from the API."""
     headers = {
-        "x-magicapi-key": "cm3pfjh8z0001l5037kgz86nb"  # API key untuk MagicAPI
+        "x-magicapi-key": "cm3pfjh8z0001l5037kgz86nb" 
     }
     response = requests.get(api_url, headers=headers)
     if response.status_code == 200:
@@ -45,11 +45,9 @@ def produce_data_to_kafka(flight_base_url, weather_base_url, airport_code, city,
         value_serializer=lambda v: json.dumps(v).encode('utf-8')
     )
 
-    # Build dynamic URL for flights and weather APIs
     flight_api_url = build_dynamic_url_flights(flight_base_url, airport_code)
     weather_api_url = build_dynamic_url_weather(weather_base_url, city)
     
-    # Fetch data
     flight_data = fetch_flights_data(flight_api_url)
     weather_data = fetch_weather_data(weather_api_url)
     
