@@ -27,28 +27,19 @@ services:
     volumes:
       - ./kafka/server.properties:/etc/kafka/server.properties
 
-  postgres:
-    build:
-      context: ./postgres
-      dockerfile: Dockerfile
-    container_name: postgres
-    environment:
-      POSTGRES_USER: etl_user
-      POSTGRES_PASSWORD: etl_password
-      POSTGRES_DB: etl_db
-    ports:
-      - 5432:5432
-    volumes:
-      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-
   airflow:
     image: apache/airflow:2.6.1
     container_name: airflow
     environment:
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      SUPABASE_HOST: ${SUPABASE_HOST}          # Ganti dengan host Supabase Anda
+      SUPABASE_PORT: ${SUPABASE_HOST}             # Default port PostgreSQL
+      SUPABASE_USER: ${SUPABASE_USER}          # Ganti dengan user Supabase Anda
+      SUPABASE_PASSWORD: ${SUPABASE_PASSWORD}  # Ganti dengan password Supabase Anda
+      SUPABASE_DB: ${SUPABASE_DB}     # Ganti dengan database Supabase Anda
     ports:
       - 8080:8080
     volumes:
       - ./dags:/opt/airflow/dags
     depends_on:
-      - postgres
+      - kafka

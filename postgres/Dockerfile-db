@@ -1,7 +1,0 @@
-FROM postgres:15
-
-# Salin file SQL untuk inisialisasi database
-COPY init.sql /docker-entrypoint-initdb.d/
-
-# Expose port PostgreSQL
-EXPOSE 5432

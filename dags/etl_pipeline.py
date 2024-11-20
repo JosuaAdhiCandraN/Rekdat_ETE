@@ -1,31 +1,42 @@
 from airflow import DAG
-from airflow.operators.bash_operator import BashOperator
-from datetime import datetime
+from airflow.operators.python_operator import PythonOperator
+from datetime import datetime, timedelta
 
+# Airflow DAG setup
 default_args = {
-    'owner': 'etl_project',
-    'start_date': datetime(2024, 11, 1),
-    'retries': 1
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'start_date': datetime(2024, 11, 20),
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
 }
 
 dag = DAG(
-    'etl_pipeline',
+    'airport_weather_flight_data_pipeline',
     default_args=default_args,
-    schedule_interval='@hourly'
+    description='Pipeline for fetching airport flight and weather data',
+    schedule_interval='@hourly',  # This will run every hour
+    catchup=False
 )
 
-# Task 1: Jalankan Kafka produser
-run_producer = BashOperator(
-    task_id='run_producer',
-    bash_command='python /opt/airflow/dags/scripts/producer.py',
+# Run flight and weather data producer
+def run_data_producer():
+    FLIGHT_BASE_URL = "https://api.magicapi.dev/api/v1/aedbx/aerodatabox"
+    WEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
+    AIRPORT_CODE = "CGK"  # Contoh kode bandara
+    CITY = "Jakarta"  # Ganti dengan kota yang diinginkan
+    FLIGHT_TOPIC = "airport_flights"
+    WEATHER_TOPIC = "weather_data"
+    
+    produce_data_to_kafka(FLIGHT_BASE_URL, WEATHER_BASE_URL, AIRPORT_CODE, CITY, FLIGHT_TOPIC, WEATHER_TOPIC)
+
+# Define Airflow tasks
+task_data_producer = PythonOperator(
+    task_id='run_data_producer',
+    python_callable=run_data_producer,
     dag=dag
 )
 
-# Task 2: Jalankan Kafka konsumen dan ETL
-run_consumer = BashOperator(
-    task_id='run_consumer',
-    bash_command='python /opt/airflow/dags/scripts/consumer.py',
-    dag=dag
-)
-
-run_producer >> run_consumer
+task_data_producer
