@@ -95,7 +95,7 @@ def consume_from_kafka():
         if message.topic == "flight_topic":
             insert_flight_data(conn, data)
         elif message.topic == "weather_topic":
-            insert_weather_data(conn, data)
+            insert_weather_data_to_postgresql(conn, data)
 
 if __name__ == "__main__":
     consume_from_kafka()
