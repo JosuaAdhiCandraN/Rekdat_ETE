@@ -2,7 +2,7 @@
   End to End Data Engineering
 </h1>
 
-### Kelompok PAW 11
+### Kelompok Rekayasa Data
 | Name                            | NIM                |
 | ------------------------------- | ------------------ |
 | Josua Adhi Candra Nugroho       | 22/503935/TK/55095 |
