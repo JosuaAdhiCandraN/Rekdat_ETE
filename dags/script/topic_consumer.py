@@ -19,20 +19,65 @@ def connect_to_supabase():
 def insert_flight_data(conn, data):
     with conn.cursor() as cursor:
         query = """
-        INSERT INTO flight_data (flight_number, airport_icao, status)
-        VALUES (%s, %s, %s)
+        INSERT INTO flight_data (
+            airport_icao, airport_name, local_time, is_cargo,
+            aircraft_model, airline_name
+        )
+        VALUES (%s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(query, (data['flight_number'], data['airport_icao'], data['status']))
+        cursor.execute(query, (
+            data["airport_icao"],
+            data["airport_name"],
+            data["local_time"],
+            data["is_cargo"],
+            data["aircraft_model"],
+            data["airline_name"]
+        ))
         conn.commit()
 
-def insert_weather_data(conn, data):
-    with conn.cursor() as cursor:
-        query = """
-        INSERT INTO weather_data (airport_icao, temperature, humidity)
-        VALUES (%s, %s, %s)
+def insert_weather_data_to_postgresql(data, table_name="weather_data"):
+    """
+    Menyisipkan data cuaca ke tabel PostgreSQL.
+    
+    Args:
+        data (list of dict): Data yang akan dimasukkan ke dalam tabel PostgreSQL.
+        table_name (str): Nama tabel di PostgreSQL.
+    """
+    connection = None
+    try:
+        connection = connect_to_supabase()  # Sambungkan ke PostgreSQL
+        cursor = connection.cursor()
+        
+        # Buat query INSERT 
+        query = f"""
+        INSERT INTO {table_name} (
+            temperature, pressure, humidity, wind_speed, weather_desc, timestamp
+        )
+        VALUES (%s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(query, (data['airport_icao'], data['main']['temp'], data['main']['humidity']))
-        conn.commit()
+        
+        # Loop melalui data dan masukkan setiap record ke tabel
+        for record in data:
+            cursor.execute(query, (
+                record["temperature"],
+                record["pressure"],
+                record["humidity"],
+                record["wind_speed"],
+                record["weather_desc"],
+                record["timestamp"]
+            ))
+        
+        # Commit perubahan ke database
+        connection.commit()
+        print(f"Data successfully inserted into {table_name}.")
+    
+    except Exception as e:
+        print(f"Error inserting data: {e}")
+    
+    finally:
+        if connection:
+            connection.close()
+
 
 def consume_from_kafka():
     consumer = KafkaConsumer(

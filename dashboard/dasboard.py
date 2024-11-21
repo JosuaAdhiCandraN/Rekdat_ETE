@@ -50,7 +50,7 @@ def update_chart(selected_data):
         x='timestamp',
         y=selected_data,
         title=f'{selected_data.capitalize()} Over Time',
-        labels={'timestamp': 'Timestamp', selected_data: selected_data.capitalize()},
+        labels={'timestamp': 'Timestamp ', selected_data: selected_data.capitalize()},
         template='plotly_dark'
     )
     return fig
@@ -58,3 +58,4 @@ def update_chart(selected_data):
 # Jalankan aplikasi
 if __name__ == '__main__':
     app.run_server(debug=True)
+    
